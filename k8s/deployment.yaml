@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: demo-api
-        image: your-dockerhub-username/demo-api:latest
+        image: openjdk:17-jdk-slim
+        command: ["sh", "-c", "echo 'Demo API - Use a imagem real com sua aplicacao' && tail -f /dev/null"]
         ports:
         - containerPort: 8080
           name: http
