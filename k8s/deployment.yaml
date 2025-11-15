@@ -17,8 +17,7 @@ spec:
     spec:
       containers:
       - name: demo-api
-        image: openjdk:17-jdk-slim
-        command: ["sh", "-c", "echo 'Demo API - Use a imagem real com sua aplicacao' && tail -f /dev/null"]
+        image: nginx:alpine
         ports:
         - containerPort: 8080
           name: http
