@@ -19,20 +19,8 @@ spec:
       - name: demo-api
         image: nginx:alpine
         ports:
-        - containerPort: 8080
+        - containerPort: 80
           name: http
-        livenessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /actuator/health
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
         resources:
           requests:
             memory: "256Mi"
