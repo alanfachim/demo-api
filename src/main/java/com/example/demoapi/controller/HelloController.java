@@ -16,9 +16,9 @@ public class HelloController {
     public Map<String, Object> hello() {
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Hello from Demo API with Dynatrace monitoring!");
-        response.put("timestamp", System.currentTimeMillis());
-        response.put("status", "OK");
-        response.put("version", "1.0.2");
+        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("status", "success");
+        response.put("version", "1.0.3");
         return response;
     }
 
