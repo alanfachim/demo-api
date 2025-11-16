@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: demo-api
-        image: localhost:32770/demo-api:v1
+        image: registry.kube-system.svc.cluster.local/demo-api:v1
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
