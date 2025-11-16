@@ -17,9 +17,9 @@ spec:
     spec:
       containers:
       - name: demo-api
-        image: nginx:alpine
+        image: localhost:32770/demo-api:v1
         ports:
-        - containerPort: 80
+        - containerPort: 8080
           name: http
         resources:
           requests:
