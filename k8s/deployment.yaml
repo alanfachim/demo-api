@@ -22,6 +22,19 @@ spec:
         ports:
         - containerPort: 8080
           name: http
+        env:
+        - name: DT_TENANT
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-config
+              key: dt-tenant
+              optional: true
+        - name: DT_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: dynatrace-config
+              key: dt-api-token
+              optional: true
         resources:
           requests:
             memory: "256Mi"
