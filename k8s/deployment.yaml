@@ -28,17 +28,15 @@ spec:
             secretKeyRef:
               name: dynatrace-config
               key: dt-tenant
-              optional: true
         - name: DT_API_TOKEN
           valueFrom:
             secretKeyRef:
               name: dynatrace-config
               key: dt-api-token
-              optional: true
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
             memory: "512Mi"
             cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"

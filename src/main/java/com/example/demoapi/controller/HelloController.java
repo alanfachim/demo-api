@@ -15,10 +15,11 @@ public class HelloController {
     @GetMapping("/hello")
     public Map<String, Object> hello() {
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Hello from Demo API with Dynatrace monitoring!");
+        response.put("message", "Hello from Demo API with Dynatrace OneAgent!");
         response.put("timestamp", LocalDateTime.now().toString());
         response.put("status", "success");
-        response.put("version", "1.0.3");
+        response.put("version", "1.0.4");
+        response.put("monitoring", "Dynatrace Active");
         return response;
     }
 
