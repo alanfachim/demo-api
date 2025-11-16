@@ -15,9 +15,10 @@ public class HelloController {
     @GetMapping("/hello")
     public Map<String, Object> hello() {
         Map<String, Object> response = new HashMap<>();
-        response.put("message", "Hello from Demo API!");
+        response.put("message", "Hello from Demo API with CI/CD!");
         response.put("timestamp", LocalDateTime.now().toString());
         response.put("status", "success");
+        response.put("version", "1.0.1");
         return response;
     }
 
