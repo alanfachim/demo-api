@@ -1,55 +1,83 @@
-# Configuração do Dynatrace
+# Configuração do Dynatrace - Trial Account Limitations
 
 ## Status Atual
-✅ Aplicação funcionando perfeitamente  
-❌ Dynatrace OneAgent **não instalado** (token sem permissão)
+✅ Aplicação funcionando perfeitamente (v1.0.3)  
+✅ CI/CD totalmente automatizado (GitHub Actions → Docker Hub → ArgoCD)  
+✅ 3 réplicas rodando em Kubernetes  
+❌ Dynatrace OneAgent **não instalado** (limitações de conta trial)
 
 ## Problema Identificado
-O token atual (`dt0c01.ZEK7Q6YVKMC5IQJO2TYGBBFS...`) é um **Personal Access Token** e **não tem permissão** para baixar o OneAgent:
+**A conta trial do Dynatrace NÃO suporta download automatizado do OneAgent via API.**
+
+### Confirmado após múltiplas tentativas:
+1. ✅ Login bem-sucedido no Dynatrace (alanfachimbr@gmail.com)
+2. ❌ API retorna **403 Forbidden** ao tentar baixar OneAgent
+3. ❌ Tokens existentes são **Personal Access Tokens** (PAT)
+4. ❌ PATs não têm scope `InstallerDownload` disponível
+5. ❌ Contas trial não podem criar API tokens com scopes v1 necessários
 
 ```bash
+# Teste realizado:
 curl -I "https://zrp88793.live.dynatrace.com/api/v1/deployment/installer/agent/unix/paas/latest?Api-Token=..."
-# Retorna: HTTP/1.1 403 Forbidden
+# Resultado: HTTP/1.1 403 Forbidden
 ```
 
-### Por que falhou?
-- Personal Access Tokens não têm o scope `InstallerDownload` necessário
-- O Dynatrace Operator também falhou pelos mesmos motivos de permissão
-- Tentamos 3 abordagens diferentes, todas bloqueadas por limitações de token
+### Limitações de Conta Trial:
+- ❌ Não permite criar tokens com scope `InstallerDownload`
+- ❌ Não permite criar tokens com scope `DataExport`  
+- ❌ Não permite criar tokens com scope `activeGateTokenManagement.create`
+- ❌ Dynatrace Operator requer esses scopes - não funciona em trial
+- ⚠️ Apenas 14 dias de trial restantes
 
-## Soluções Possíveis
+## Soluções Alternativas
 
-### Opção 1: Criar API Token com Scopes Corretos (Recomendado)
-1. Acesse o Dynatrace: https://zrp88793.live.dynatrace.com
-2. Vá em **Settings** → **Access tokens** → **Generate new token**
-3. Selecione os seguintes scopes **obrigatórios**:
-   - ✅ `InstallerDownload` - Download OneAgent installer
-   - ✅ `DataExport` - Export data
-   - ✅ `metrics.ingest` - Ingest metrics
-4. Gere o token e copie-o
-5. Atualize o secret no Kubernetes:
-```bash
-kubectl create secret generic dynatrace-config \
-  --from-literal=dt-tenant=zrp88793 \
-  --from-literal=dt-api-token=SEU_NOVO_TOKEN_AQUI \
-  -n demo-api --dry-run=client -o yaml | kubectl apply -f -
-```
-6. Force rebuild da aplicação:
-```bash
-cd /home/alanf/demo-api
-# Modifique entrypoint.sh para incluir lógica de download do OneAgent
-# Commit e push para disparar CI/CD
-```
+### Opção 1: Upgrade para Conta Paga ⭐ RECOMENDADO
+A maneira correta e suportada é fazer upgrade da conta para ter acesso completo aos API tokens:
+1. Acesse Dynatrace e faça upgrade da conta trial
+2. Após upgrade, gere API token com scopes:
+   - `InstallerDownload`
+   - `DataExport`
+   - `metrics.ingest`
+   - `activeGateTokenManagement.create`
+3. Atualize o secret: `kubectl create secret generic dynatrace-config -n demo-api ...`
+4. Faça rebuild da aplicação
 
-### Opção 2: Usar Dynatrace Operator (Requer Token API)
-Se conseguir criar um token API com os scopes corretos:
-```bash
-# Os arquivos já existem em k8s/dynatrace/
-kubectl apply -f k8s/dynatrace/dynakube.yaml
+### Opção 2: OpenTelemetry (Alternativa Gratuita) ⭐ MELHOR ALTERNATIVA
+Usar OpenTelemetry + Jaeger/Prometheus como alternativa open-source:
+
+```yaml
+# Adicionar dependências no pom.xml
+<dependency>
+    <groupId>io.opentelemetry.instrumentation</groupId>
+    <artifactId>opentelemetry-spring-boot-starter</artifactId>
+</dependency>
 ```
 
-### Opção 3: Usar OneAgent Container (Docker Hub)
-Alternativa sem precisar baixar via API:
+**Vantagens:**
+- ✅ 100% gratuito e open-source
+- ✅ Sem limitações de trial
+- ✅ Funciona em qualquer ambiente
+- ✅ Vendor-neutral (pode migrar para Dynatrace depois)
+
+### Opção 3: Manual OneAgent Download (Workaround Temporário)
+Se tiver acesso à UI do Dynatrace, pode baixar manualmente:
+1. Acesse Deploy Dynatrace → Linux
+2. Baixe o `oneagent-unix.sh` manualmente
+3. Adicione ao Docker image durante build
+4. Modifique Dockerfile para copiar o arquivo local
+
+## Conclusão e Recomendação
+
+**Para Produção:** Recomendo **OpenTelemetry** como solução de observabilidade. É gratuito, maduro e amplamente adotado.
+
+**Setup Atual:**
+- ✅ Minikube rodando
+- ✅ ArgoCD configurado (GitOps)
+- ✅ CI/CD automatizado
+- ✅ Aplicação funcionando perfeitamente
+- ✅ 3 réplicas em alta disponibilidade
+
+**O que já funciona:**
 ```dockerfile
 # No Dockerfile, adicione:
 FROM dynatrace/oneagent:latest AS dynatrace
