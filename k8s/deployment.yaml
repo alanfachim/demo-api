@@ -17,8 +17,8 @@ spec:
     spec:
       containers:
       - name: demo-api
-        image: 10.99.204.181/demo-api:v1
-        imagePullPolicy: IfNotPresent
+        image: alanfachim/demo-api:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
           name: http
